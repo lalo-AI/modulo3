@@ -1,0 +1,226 @@
+{
+  "historia": "HU-02",
+  "casos": [
+    {
+      "id": "CP-01",
+      "escenario": "Ver el directorio completo de empleados",
+      "nivel": "api",
+      "precondiciones": [
+        "Existen los empleados EMP-0001 Ana Gómez (Tecnología, activo), EMP-0002 Luis Pérez (Ventas, activo) y EMP-0003 Marta Ruiz (Finanzas, baja) creados vía POST /api/empleados"
+      ],
+      "pasos": [
+        "Enviar GET /api/empleados",
+        "Verificar código de respuesta 200",
+        "Verificar que el arreglo de empleados tiene 3 elementos",
+        "Verificar que cada elemento incluye numero_empleado, nombre, puesto, departamento y estado"
+      ],
+      "datos": {
+        "total_empleados": "3"
+      },
+      "resultado_esperado": "La API responde 200 con una lista de 3 empleados, cada uno con numero_empleado, nombre, puesto, departamento y estado."
+    },
+    {
+      "id": "CP-02",
+      "escenario": "Ver el directorio completo de empleados",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existen los empleados EMP-0001 Ana Gómez (Tecnología, activo), EMP-0002 Luis Pérez (Ventas, activo) y EMP-0003 Marta Ruiz (Finanzas, baja)"
+      ],
+      "pasos": [
+        "Abrir la pantalla del directorio de empleados",
+        "Verificar que el elemento 'tabla-empleados' muestra 3 filas",
+        "Verificar que la fila 'fila-empleado-1' muestra 'numero-empleado-1' con 'EMP-0001' y 'estado-empleado-1' con 'Activo'",
+        "Verificar que la fila 'fila-empleado-2' muestra 'numero-empleado-2' con 'EMP-0002' y 'estado-empleado-2' con 'Activo'",
+        "Verificar que la fila 'fila-empleado-3' muestra 'numero-empleado-3' con 'EMP-0003' y 'estado-empleado-3' con 'Baja'"
+      ],
+      "datos": {
+        "total_filas": "3"
+      },
+      "resultado_esperado": "El directorio muestra 3 filas con número de empleado, nombre, puesto, departamento y estado correctos."
+    },
+    {
+      "id": "CP-03",
+      "escenario": "Buscar un empleado por nombre",
+      "nivel": "api",
+      "precondiciones": [
+        "Existen EMP-0001 Ana Gómez (Tecnología, activo) y EMP-0002 Luis Pérez (Ventas, activo)"
+      ],
+      "pasos": [
+        "Enviar GET /api/empleados?buscar=Ana",
+        "Verificar código de respuesta 200",
+        "Verificar que la respuesta contiene 1 resultado",
+        "Verificar que el resultado tiene nombre 'Ana Gómez' y numero_empleado 'EMP-0001'"
+      ],
+      "datos": {
+        "buscar": "Ana",
+        "nombre_esperado": "Ana Gómez",
+        "numero_esperado": "EMP-0001"
+      },
+      "resultado_esperado": "La API responde 200 con 1 empleado cuyo nombre es Ana Gómez y numero_empleado EMP-0001."
+    },
+    {
+      "id": "CP-04",
+      "escenario": "Buscar un empleado por nombre",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existen EMP-0001 Ana Gómez (Tecnología, activo) y EMP-0002 Luis Pérez (Ventas, activo)"
+      ],
+      "pasos": [
+        "Abrir el directorio de empleados",
+        "Escribir 'Ana' en el campo 'buscar-empleados'",
+        "Verificar que 'tabla-empleados' muestra 1 fila",
+        "Verificar que 'numero-empleado-1' muestra 'EMP-0001'"
+      ],
+      "datos": {
+        "texto_busqueda": "Ana"
+      },
+      "resultado_esperado": "El directorio muestra 1 resultado con Ana Gómez y número EMP-0001."
+    },
+    {
+      "id": "CP-05",
+      "escenario": "Buscar un empleado por correo sin distinguir mayúsculas de minúsculas",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado Ana Gómez con correo ana.gomez@empresa.com y número EMP-0001"
+      ],
+      "pasos": [
+        "Enviar GET /api/empleados?buscar=ANA.GOMEZ@EMPRESA.COM",
+        "Verificar código de respuesta 200",
+        "Verificar que la respuesta contiene 1 resultado",
+        "Verificar que el resultado tiene nombre 'Ana Gómez' y numero_empleado 'EMP-0001'"
+      ],
+      "datos": {
+        "correo": "ana.gomez@empresa.com",
+        "buscar": "ANA.GOMEZ@EMPRESA.COM"
+      },
+      "resultado_esperado": "La búsqueda es insensible a mayúsculas y devuelve 1 resultado con Ana Gómez, EMP-0001."
+    },
+    {
+      "id": "CP-06",
+      "escenario": "Buscar un empleado por correo sin distinguir mayúsculas de minúsculas",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado Ana Gómez con correo ana.gomez@empresa.com y número EMP-0001"
+      ],
+      "pasos": [
+        "Abrir el directorio de empleados",
+        "Escribir 'ANA.GOMEZ@EMPRESA.COM' en el campo 'buscar-empleados'",
+        "Verificar que 'tabla-empleados' muestra 1 fila",
+        "Verificar que 'numero-empleado-1' muestra 'EMP-0001'"
+      ],
+      "datos": {
+        "texto_busqueda": "ANA.GOMEZ@EMPRESA.COM"
+      },
+      "resultado_esperado": "El directorio muestra 1 resultado con Ana Gómez y número EMP-0001 aunque la búsqueda esté en mayúsculas."
+    },
+    {
+      "id": "CP-07",
+      "escenario": "Filtrar empleados por departamento",
+      "nivel": "api",
+      "precondiciones": [
+        "Existen EMP-0001 Tecnología activo, EMP-0002 Ventas activo, EMP-0003 Finanzas activo"
+      ],
+      "pasos": [
+        "Enviar GET /api/empleados?departamento=Ventas",
+        "Verificar código de respuesta 200",
+        "Verificar que la respuesta contiene 1 resultado",
+        "Verificar que el resultado tiene nombre 'Luis Pérez' y departamento 'Ventas'"
+      ],
+      "datos": {
+        "departamento": "Ventas",
+        "nombre_esperado": "Luis Pérez"
+      },
+      "resultado_esperado": "La API responde 200 con 1 empleado del departamento Ventas: Luis Pérez."
+    },
+    {
+      "id": "CP-08",
+      "escenario": "Filtrar empleados por departamento",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existen EMP-0001 Tecnología activo, EMP-0002 Ventas activo, EMP-0003 Finanzas activo"
+      ],
+      "pasos": [
+        "Abrir el directorio de empleados",
+        "Seleccionar 'Ventas' en el elemento 'filtro-departamento'",
+        "Verificar que 'tabla-empleados' muestra 1 fila",
+        "Verificar que la fila muestra 'Luis Pérez' con departamento 'Ventas'"
+      ],
+      "datos": {
+        "departamento": "Ventas"
+      },
+      "resultado_esperado": "El directorio muestra únicamente a Luis Pérez filtrado por el departamento Ventas."
+    },
+    {
+      "id": "CP-09",
+      "escenario": "Buscar un texto que no coincide con ningún empleado",
+      "nivel": "api",
+      "precondiciones": [
+        "Existen EMP-0001 Ana Gómez activo y EMP-0002 Luis Pérez activo"
+      ],
+      "pasos": [
+        "Enviar GET /api/empleados?buscar=Zzzxyz",
+        "Verificar código de respuesta 200",
+        "Verificar que la respuesta contiene 0 resultados"
+      ],
+      "datos": {
+        "buscar": "Zzzxyz"
+      },
+      "resultado_esperado": "La API responde 200 con una lista vacía de empleados."
+    },
+    {
+      "id": "CP-10",
+      "escenario": "Buscar un texto que no coincide con ningún empleado",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existen EMP-0001 Ana Gómez activo y EMP-0002 Luis Pérez activo"
+      ],
+      "pasos": [
+        "Abrir el directorio de empleados",
+        "Escribir 'Zzzxyz' en el campo 'buscar-empleados'",
+        "Verificar que 'tabla-empleados' no muestra filas",
+        "Verificar que se muestra el elemento 'sin-resultados' con el texto 'No se encontraron empleados'"
+      ],
+      "datos": {
+        "texto_busqueda": "Zzzxyz"
+      },
+      "resultado_esperado": "El directorio muestra el mensaje 'No se encontraron empleados' y ninguna fila."
+    },
+    {
+      "id": "CP-11",
+      "escenario": "Un empleado dado de baja sigue apareciendo en el directorio",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado Marta Ruiz con número EMP-0003, estado baja y fecha de baja 2024-03-01"
+      ],
+      "pasos": [
+        "Enviar GET /api/empleados",
+        "Verificar código de respuesta 200",
+        "Verificar que el empleado EMP-0003 aparece en la respuesta",
+        "Verificar que el campo estado del empleado EMP-0003 es 'baja'"
+      ],
+      "datos": {
+        "numero_empleado": "EMP-0003",
+        "estado_esperado": "baja",
+        "fecha_baja": "2024-03-01"
+      },
+      "resultado_esperado": "El empleado dado de baja EMP-0003 aparece en la lista con estado 'baja'."
+    },
+    {
+      "id": "CP-12",
+      "escenario": "Un empleado dado de baja sigue apareciendo en el directorio",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado Marta Ruiz con número EMP-0003, estado baja y fecha de baja 2024-03-01"
+      ],
+      "pasos": [
+        "Abrir el directorio de empleados",
+        "Verificar que 'tabla-empleados' incluye la fila 'fila-empleado-3' con 'Marta Ruiz'",
+        "Verificar que 'estado-empleado-3' muestra 'Baja'"
+      ],
+      "datos": {
+        "numero_empleado": "EMP-0003"
+      },
+      "resultado_esperado": "El directorio muestra a Marta Ruiz con estado 'Baja'."
+    }
+  ]
+}
