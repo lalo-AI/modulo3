@@ -12,6 +12,21 @@ DEPARTAMENTOS_VALIDOS = [
 ]
 
 
+def _validar_puesto(valor: str) -> str:
+    limpio = valor.strip()
+    if not (2 <= len(limpio) <= 60):
+        raise ValueError("El campo 'puesto' debe tener entre 2 y 60 caracteres")
+    return limpio
+
+
+def _validar_departamento(valor: str) -> str:
+    if valor not in DEPARTAMENTOS_VALIDOS:
+        raise ValueError(
+            "El campo 'departamento' debe ser uno de: " + ", ".join(DEPARTAMENTOS_VALIDOS)
+        )
+    return valor
+
+
 class EmpleadoCrear(BaseModel):
     nombre: str
     correo: str
@@ -30,10 +45,7 @@ class EmpleadoCrear(BaseModel):
     @field_validator("puesto")
     @classmethod
     def validar_puesto(cls, valor: str) -> str:
-        limpio = valor.strip()
-        if not (2 <= len(limpio) <= 60):
-            raise ValueError("El campo 'puesto' debe tener entre 2 y 60 caracteres")
-        return limpio
+        return _validar_puesto(valor)
 
     @field_validator("correo")
     @classmethod
@@ -46,11 +58,7 @@ class EmpleadoCrear(BaseModel):
     @field_validator("departamento")
     @classmethod
     def validar_departamento(cls, valor: str) -> str:
-        if valor not in DEPARTAMENTOS_VALIDOS:
-            raise ValueError(
-                "El campo 'departamento' debe ser uno de: " + ", ".join(DEPARTAMENTOS_VALIDOS)
-            )
-        return valor
+        return _validar_departamento(valor)
 
     @field_validator("fecha_ingreso")
     @classmethod
@@ -58,6 +66,25 @@ class EmpleadoCrear(BaseModel):
         if valor > date.today():
             raise ValueError("La fecha de ingreso no puede ser futura")
         return valor
+
+
+class EmpleadoEditar(BaseModel):
+    puesto: str
+    departamento: str
+
+    @field_validator("puesto")
+    @classmethod
+    def validar_puesto(cls, valor: str) -> str:
+        return _validar_puesto(valor)
+
+    @field_validator("departamento")
+    @classmethod
+    def validar_departamento(cls, valor: str) -> str:
+        return _validar_departamento(valor)
+
+
+class EmpleadoBaja(BaseModel):
+    fecha_baja: date
 
 
 class EmpleadoSalida(BaseModel):

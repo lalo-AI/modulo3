@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-function DirectorioEmpleados({ version }) {
+function DirectorioEmpleados({ version, onEditar, onBaja }) {
   const [empleados, setEmpleados] = useState([])
   const [departamentos, setDepartamentos] = useState([])
   const [busqueda, setBusqueda] = useState('')
@@ -57,17 +57,36 @@ function DirectorioEmpleados({ version }) {
               <th>Puesto</th>
               <th>Departamento</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {empleados.map((empleado) => (
-              <tr data-testid={`fila-empleado-${empleado.id}`} key={empleado.id}>
-                <td data-testid={`numero-empleado-${empleado.id}`}>{empleado.numero_empleado}</td>
+              <tr data-testid={`fila-empleado-${empleado.numero_empleado}`} key={empleado.id}>
+                <td data-testid={`numero-empleado-${empleado.numero_empleado}`}>
+                  {empleado.numero_empleado}
+                </td>
                 <td>{empleado.nombre}</td>
                 <td>{empleado.puesto}</td>
                 <td>{empleado.departamento}</td>
-                <td data-testid={`estado-empleado-${empleado.id}`}>
+                <td data-testid={`estado-empleado-${empleado.numero_empleado}`}>
                   {empleado.estado === 'baja' ? 'Baja' : 'Activo'}
+                </td>
+                <td>
+                  <button
+                    data-testid={`editar-empleado-${empleado.numero_empleado}`}
+                    onClick={() => onEditar?.(empleado)}
+                    disabled={empleado.estado === 'baja'}
+                  >
+                    Editar
+                  </button>
+                  <button
+                    data-testid={`baja-empleado-${empleado.numero_empleado}`}
+                    onClick={() => onBaja?.(empleado)}
+                    disabled={empleado.estado === 'baja'}
+                  >
+                    Dar de baja
+                  </button>
                 </td>
               </tr>
             ))}

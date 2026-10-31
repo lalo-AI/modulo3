@@ -5,7 +5,13 @@ from fastapi.responses import JSONResponse
 from sqlalchemy import func
 from sqlalchemy.orm import Session
 
-from esquemas import DEPARTAMENTOS_VALIDOS, EmpleadoCrear, EmpleadoSalida
+from esquemas import (
+    DEPARTAMENTOS_VALIDOS,
+    EmpleadoBaja,
+    EmpleadoCrear,
+    EmpleadoEditar,
+    EmpleadoSalida,
+)
 from modelos import Base, Empleado, SessionLocal, engine
 
 Base.metadata.create_all(bind=engine)
@@ -40,6 +46,15 @@ def salud():
 @app.get("/api/departamentos")
 def departamentos():
     return DEPARTAMENTOS_VALIDOS
+
+
+def obtener_empleado_o_404(numero_empleado: str, db: Session) -> Empleado:
+    empleado = (
+        db.query(Empleado).filter(Empleado.numero_empleado == numero_empleado).first()
+    )
+    if not empleado:
+        raise HTTPException(status_code=404, detail="El empleado no existe")
+    return empleado
 
 
 @app.get("/api/empleados", response_model=list[EmpleadoSalida])
@@ -78,6 +93,46 @@ def crear_empleado(datos: EmpleadoCrear, db: Session = Depends(get_db)):
         estado="activo",
     )
     db.add(empleado)
+    db.commit()
+    db.refresh(empleado)
+    return empleado
+
+
+@app.get("/api/empleados/{numero_empleado}", response_model=EmpleadoSalida)
+def obtener_empleado(numero_empleado: str, db: Session = Depends(get_db)):
+    return obtener_empleado_o_404(numero_empleado, db)
+
+
+@app.put("/api/empleados/{numero_empleado}", response_model=EmpleadoSalida)
+def editar_empleado(
+    numero_empleado: str, datos: EmpleadoEditar, db: Session = Depends(get_db)
+):
+    empleado = obtener_empleado_o_404(numero_empleado, db)
+    if empleado.estado == "baja":
+        raise HTTPException(
+            status_code=409, detail="No se puede editar a un empleado dado de baja"
+        )
+
+    empleado.puesto = datos.puesto
+    empleado.departamento = datos.departamento
+    db.commit()
+    db.refresh(empleado)
+    return empleado
+
+
+@app.put("/api/empleados/{numero_empleado}/baja", response_model=EmpleadoSalida)
+def dar_de_baja_empleado(
+    numero_empleado: str, datos: EmpleadoBaja, db: Session = Depends(get_db)
+):
+    empleado = obtener_empleado_o_404(numero_empleado, db)
+    if datos.fecha_baja < empleado.fecha_ingreso:
+        raise HTTPException(
+            status_code=422,
+            detail="La fecha de baja no puede ser anterior a la fecha de ingreso",
+        )
+
+    empleado.estado = "baja"
+    empleado.fecha_baja = datos.fecha_baja
     db.commit()
     db.refresh(empleado)
     return empleado

@@ -1,0 +1,297 @@
+{
+  "historia": "HU-03",
+  "casos": [
+    {
+      "id": "CP-01",
+      "escenario": "Editar puesto y departamento de un empleado activo",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado EMP-0001 con puesto \"Analista\" y departamento \"Ventas\", en estado \"activo\""
+      ],
+      "pasos": [
+        "Enviar PUT a /api/empleados/EMP-0001 con puesto \"Analista Senior\" y departamento \"Finanzas\"",
+        "Verificar que la respuesta tiene código 200",
+        "Consultar el empleado EMP-0001 y verificar puesto \"Analista Senior\" y departamento \"Finanzas\"",
+        "Verificar que el estado sigue siendo \"activo\""
+      ],
+      "datos": {
+        "id": "EMP-0001",
+        "puesto_nuevo": "Analista Senior",
+        "departamento_nuevo": "Finanzas"
+      },
+      "resultado_esperado": "La respuesta es 200 y el empleado queda con puesto \"Analista Senior\", departamento \"Finanzas\" y estado \"activo\"."
+    },
+    {
+      "id": "CP-02",
+      "escenario": "Editar puesto y departamento de un empleado activo",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado EMP-0001 visible en data-testid \"tabla-empleados\" con puesto \"Analista\" y departamento \"Ventas\", estado \"Activo\""
+      ],
+      "pasos": [
+        "Localizar data-testid \"fila-empleado-EMP-0001\"",
+        "Hacer clic en data-testid \"editar-empleado-EMP-0001\"",
+        "Escribir \"Analista Senior\" en data-testid \"empleado-puesto\"",
+        "Escribir \"Finanzas\" en data-testid \"empleado-departamento\"",
+        "Hacer clic en data-testid \"empleado-guardar\"",
+        "Verificar que aparece data-testid \"mensaje-exito\"",
+        "Verificar que la fila \"fila-empleado-EMP-0001\" muestra el nuevo puesto y departamento",
+        "Verificar que data-testid \"estado-empleado-EMP-0001\" sigue mostrando \"Activo\""
+      ],
+      "datos": {
+        "id": "EMP-0001",
+        "puesto": "Analista Senior",
+        "departamento": "Finanzas"
+      },
+      "resultado_esperado": "Se muestra mensaje de éxito, la fila refleja el nuevo puesto y departamento, y el estado sigue siendo \"Activo\"."
+    },
+    {
+      "id": "CP-03",
+      "escenario": "El número de empleado y el correo no se modifican al editar",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado EMP-0002 con correo \"ana.lopez@empresa.com\", en estado \"activo\""
+      ],
+      "pasos": [
+        "Enviar edición a /api/empleados/EMP-0002 con numero_empleado \"EMP-9999\", correo \"otro@empresa.com\", puesto \"Analista\" y departamento \"Operaciones\"",
+        "Verificar que la respuesta tiene código 200",
+        "Consultar el empleado EMP-0002 y verificar que numero_empleado sigue siendo \"EMP-0002\"",
+        "Verificar que el correo sigue siendo \"ana.lopez@empresa.com\""
+      ],
+      "datos": {
+        "id": "EMP-0002",
+        "numero_empleado_enviado": "EMP-9999",
+        "correo_enviado": "otro@empresa.com",
+        "puesto": "Analista",
+        "departamento": "Operaciones"
+      },
+      "resultado_esperado": "La API ignora numero_empleado y correo enviados; el registro conserva numero_empleado \"EMP-0002\" y correo \"ana.lopez@empresa.com\"."
+    },
+    {
+      "id": "CP-04",
+      "escenario": "El número de empleado y el correo no se modifican al editar",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado EMP-0002 con correo \"ana.lopez@empresa.com\" visible en el directorio"
+      ],
+      "pasos": [
+        "Localizar data-testid \"fila-empleado-EMP-0002\" en data-testid \"tabla-empleados\"",
+        "Hacer clic en data-testid \"editar-empleado-EMP-0002\"",
+        "Escribir \"Analista\" en data-testid \"empleado-puesto\"",
+        "Escribir \"Operaciones\" en data-testid \"empleado-departamento\"",
+        "Hacer clic en data-testid \"empleado-guardar\"",
+        "Verificar que aparece data-testid \"mensaje-exito\"",
+        "Verificar que data-testid \"numero-empleado-EMP-0002\" sigue mostrando \"EMP-0002\""
+      ],
+      "datos": {
+        "id": "EMP-0002",
+        "puesto": "Analista",
+        "departamento": "Operaciones"
+      },
+      "resultado_esperado": "El directorio muestra numero_empleado \"EMP-0002\" sin cambios tras guardar la edición de puesto y departamento."
+    },
+    {
+      "id": "CP-05",
+      "escenario": "Rechazar la edición con un puesto inválido",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado EMP-0003 con puesto \"Analista\", en estado \"activo\""
+      ],
+      "pasos": [
+        "Enviar edición a /api/empleados/EMP-0003 con puesto \"A\" y departamento \"Tecnología\"",
+        "Verificar que la respuesta tiene código 422",
+        "Verificar que el detail indica error en el campo puesto"
+      ],
+      "datos": {
+        "id": "EMP-0003",
+        "puesto": "A",
+        "departamento": "Tecnología"
+      },
+      "resultado_esperado": "La respuesta es 422 con mensaje de validación sobre el campo puesto."
+    },
+    {
+      "id": "CP-06",
+      "escenario": "Rechazar la edición con un puesto inválido",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado EMP-0003 visible en el directorio con puesto \"Analista\""
+      ],
+      "pasos": [
+        "Localizar data-testid \"fila-empleado-EMP-0003\"",
+        "Hacer clic en data-testid \"editar-empleado-EMP-0003\"",
+        "Escribir \"A\" en data-testid \"empleado-puesto\"",
+        "Escribir \"Tecnología\" en data-testid \"empleado-departamento\"",
+        "Hacer clic en data-testid \"empleado-guardar\"",
+        "Verificar que aparece data-testid \"mensaje-error\" indicando que el campo puesto debe corregirse"
+      ],
+      "datos": {
+        "id": "EMP-0003",
+        "puesto": "A",
+        "departamento": "Tecnología"
+      },
+      "resultado_esperado": "Se muestra mensaje-error señalando el campo puesto inválido y no se guardan los cambios."
+    },
+    {
+      "id": "CP-07",
+      "escenario": "Rechazar la edición con un departamento inválido",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado EMP-0004 con departamento \"Tecnología\", en estado \"activo\""
+      ],
+      "pasos": [
+        "Enviar edición a /api/empleados/EMP-0004 con puesto \"Analista\" y departamento \"Marketing\"",
+        "Verificar que la respuesta tiene código 422",
+        "Verificar que el detail indica error en el campo departamento"
+      ],
+      "datos": {
+        "id": "EMP-0004",
+        "puesto": "Analista",
+        "departamento": "Marketing"
+      },
+      "resultado_esperado": "La respuesta es 422 con mensaje de validación sobre el campo departamento."
+    },
+    {
+      "id": "CP-08",
+      "escenario": "Rechazar la edición con un departamento inválido",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado EMP-0004 visible en el directorio con departamento \"Tecnología\""
+      ],
+      "pasos": [
+        "Localizar data-testid \"fila-empleado-EMP-0004\"",
+        "Hacer clic en data-testid \"editar-empleado-EMP-0004\"",
+        "Escribir \"Analista\" en data-testid \"empleado-puesto\"",
+        "Escribir \"Marketing\" en data-testid \"empleado-departamento\"",
+        "Hacer clic en data-testid \"empleado-guardar\"",
+        "Verificar que aparece data-testid \"mensaje-error\" indicando que el campo departamento debe corregirse"
+      ],
+      "datos": {
+        "id": "EMP-0004",
+        "puesto": "Analista",
+        "departamento": "Marketing"
+      },
+      "resultado_esperado": "Se muestra mensaje-error señalando el campo departamento inválido y no se guardan los cambios."
+    },
+    {
+      "id": "CP-09",
+      "escenario": "Rechazar la edición de un empleado dado de baja",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado EMP-0005 en estado \"baja\" con fecha_baja \"2024-03-01\""
+      ],
+      "pasos": [
+        "Enviar edición a /api/empleados/EMP-0005 con puesto \"Analista Senior\" y departamento \"Finanzas\"",
+        "Verificar que la respuesta tiene código 409",
+        "Verificar que la respuesta contiene el mensaje \"No se puede editar a un empleado dado de baja\""
+      ],
+      "datos": {
+        "id": "EMP-0005",
+        "puesto": "Analista Senior",
+        "departamento": "Finanzas"
+      },
+      "resultado_esperado": "La respuesta es 409 con detail \"No se puede editar a un empleado dado de baja\"."
+    },
+    {
+      "id": "CP-10",
+      "escenario": "Rechazar la edición de un empleado dado de baja",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado EMP-0005 visible en el directorio con data-testid \"estado-empleado-EMP-0005\" mostrando \"Baja\""
+      ],
+      "pasos": [
+        "Localizar data-testid \"fila-empleado-EMP-0005\"",
+        "Hacer clic en data-testid \"editar-empleado-EMP-0005\"",
+        "Escribir \"Analista Senior\" en data-testid \"empleado-puesto\"",
+        "Escribir \"Finanzas\" en data-testid \"empleado-departamento\"",
+        "Hacer clic en data-testid \"empleado-guardar\"",
+        "Verificar que aparece data-testid \"mensaje-error\" con el texto \"No se puede editar a un empleado dado de baja\""
+      ],
+      "datos": {
+        "id": "EMP-0005",
+        "puesto": "Analista Senior",
+        "departamento": "Finanzas"
+      },
+      "resultado_esperado": "Se muestra mensaje-error indicando que no se puede editar a un empleado dado de baja y los datos no cambian."
+    },
+    {
+      "id": "CP-11",
+      "escenario": "Dar de baja a un empleado activo",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado EMP-0006 con fecha_ingreso \"2022-01-10\", en estado \"activo\""
+      ],
+      "pasos": [
+        "Enviar solicitud de baja a /api/empleados/EMP-0006 con fecha_baja \"2024-05-15\"",
+        "Verificar que la respuesta tiene código 200",
+        "Verificar que el estado del empleado es \"baja\"",
+        "Verificar que el empleado tiene fecha_baja \"2024-05-15\"",
+        "Consultar GET /api/empleados y verificar que EMP-0006 sigue apareciendo en la lista"
+      ],
+      "datos": {
+        "id": "EMP-0006",
+        "fecha_baja": "2024-05-15"
+      },
+      "resultado_esperado": "La respuesta es 200, el empleado queda en estado \"baja\" con fecha_baja \"2024-05-15\" y sigue apareciendo en el listado."
+    },
+    {
+      "id": "CP-12",
+      "escenario": "Dar de baja a un empleado activo",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado EMP-0006 visible en el directorio con estado \"Activo\""
+      ],
+      "pasos": [
+        "Localizar data-testid \"fila-empleado-EMP-0006\" en data-testid \"tabla-empleados\"",
+        "Hacer clic en data-testid \"baja-empleado-EMP-0006\"",
+        "Escribir \"2024-05-15\" en data-testid \"empleado-fecha-baja\"",
+        "Hacer clic en data-testid \"confirmar-baja\"",
+        "Verificar que aparece data-testid \"mensaje-exito\"",
+        "Verificar que data-testid \"estado-empleado-EMP-0006\" muestra \"Baja\"",
+        "Verificar que data-testid \"fila-empleado-EMP-0006\" sigue visible en \"tabla-empleados\""
+      ],
+      "datos": {
+        "id": "EMP-0006",
+        "fecha_baja": "2024-05-15"
+      },
+      "resultado_esperado": "El empleado pasa a estado \"Baja\", se muestra la fecha de baja y sigue apareciendo en el directorio."
+    },
+    {
+      "id": "CP-13",
+      "escenario": "Rechazar la baja con una fecha de baja anterior a la fecha de ingreso",
+      "nivel": "api",
+      "precondiciones": [
+        "Existe el empleado EMP-0007 con fecha_ingreso \"2023-06-01\", en estado \"activo\""
+      ],
+      "pasos": [
+        "Enviar solicitud de baja a /api/empleados/EMP-0007 con fecha_baja \"2023-01-01\"",
+        "Verificar que la respuesta tiene código 422",
+        "Verificar que el detail indica error en el campo fecha_baja"
+      ],
+      "datos": {
+        "id": "EMP-0007",
+        "fecha_baja": "2023-01-01"
+      },
+      "resultado_esperado": "La respuesta es 422 con mensaje de validación sobre el campo fecha_baja por ser anterior a la fecha de ingreso."
+    },
+    {
+      "id": "CP-14",
+      "escenario": "Rechazar la baja con una fecha de baja anterior a la fecha de ingreso",
+      "nivel": "e2e",
+      "precondiciones": [
+        "Existe el empleado EMP-0007 visible en el directorio con estado \"Activo\" y fecha_ingreso \"2023-06-01\""
+      ],
+      "pasos": [
+        "Localizar data-testid \"fila-empleado-EMP-0007\"",
+        "Hacer clic en data-testid \"baja-empleado-EMP-0007\"",
+        "Escribir \"2023-01-01\" en data-testid \"empleado-fecha-baja\"",
+        "Hacer clic en data-testid \"confirmar-baja\"",
+        "Verificar que aparece data-testid \"mensaje-error\" indicando que el campo fecha_baja debe corregirse"
+      ],
+      "datos": {
+        "id": "EMP-0007",
+        "fecha_baja": "2023-01-01"
+      },
+      "resultado_esperado": "Se muestra mensaje-error señalando que fecha_baja es inválida y el empleado permanece en estado \"Activo\"."
+    }
+  ]
+}
