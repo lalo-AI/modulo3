@@ -3,11 +3,13 @@ import FormularioEmpleado from './FormularioEmpleado.jsx'
 import DirectorioEmpleados from './DirectorioEmpleados.jsx'
 import EditarEmpleado from './EditarEmpleado.jsx'
 import BajaEmpleado from './BajaEmpleado.jsx'
+import SolicitarVacaciones from './SolicitarVacaciones.jsx'
 
 function App() {
   const [version, setVersion] = useState(0)
   const [empleadoEnEdicion, setEmpleadoEnEdicion] = useState(null)
   const [empleadoEnBaja, setEmpleadoEnBaja] = useState(null)
+  const [empleadoEnVacaciones, setEmpleadoEnVacaciones] = useState(null)
 
   const refrescar = () => setVersion((v) => v + 1)
 
@@ -32,11 +34,19 @@ function App() {
         />
       )}
 
+      {empleadoEnVacaciones && (
+        <SolicitarVacaciones
+          empleado={empleadoEnVacaciones}
+          onCancelar={() => setEmpleadoEnVacaciones(null)}
+        />
+      )}
+
       <h1>Directorio de empleados</h1>
       <DirectorioEmpleados
         version={version}
         onEditar={setEmpleadoEnEdicion}
         onBaja={setEmpleadoEnBaja}
+        onVacaciones={setEmpleadoEnVacaciones}
       />
     </div>
   )

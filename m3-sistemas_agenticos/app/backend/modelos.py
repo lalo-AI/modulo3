@@ -2,7 +2,7 @@
 import os
 from datetime import datetime
 
-from sqlalchemy import Column, Date, DateTime, Integer, String, create_engine
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 DATOS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "datos")
@@ -27,3 +27,13 @@ class Empleado(Base):
     estado = Column(String, nullable=False, default="activo")
     fecha_baja = Column(Date, nullable=True)
     creado_en = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class Vacaciones(Base):
+    __tablename__ = "vacaciones"
+
+    id = Column(Integer, primary_key=True, index=True)
+    empleado_id = Column(Integer, ForeignKey("empleados.id"), nullable=False, index=True)
+    fecha_inicio = Column(Date, nullable=False)
+    fecha_fin = Column(Date, nullable=False)
+    dias_habiles = Column(Integer, nullable=False)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-function DirectorioEmpleados({ version, onEditar, onBaja }) {
+function DirectorioEmpleados({ version, onEditar, onBaja, onVacaciones }) {
   const [empleados, setEmpleados] = useState([])
   const [departamentos, setDepartamentos] = useState([])
   const [busqueda, setBusqueda] = useState('')
@@ -87,6 +87,14 @@ function DirectorioEmpleados({ version, onEditar, onBaja }) {
                   >
                     Dar de baja
                   </button>
+                  {empleado.estado !== 'baja' && (
+                    <button
+                      data-testid={`vacaciones-abrir-${empleado.id}`}
+                      onClick={() => onVacaciones?.(empleado)}
+                    >
+                      Solicitar vacaciones
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

@@ -1,4 +1,6 @@
 """Punto de entrada de la API de gestión de empleados."""
+from datetime import date
+
 from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -11,8 +13,12 @@ from esquemas import (
     EmpleadoCrear,
     EmpleadoEditar,
     EmpleadoSalida,
+    SaldoVacacionesSalida,
+    VacacionesCrear,
+    VacacionesSalida,
 )
-from modelos import Base, Empleado, SessionLocal, engine
+from modelos import Base, Empleado, SessionLocal, Vacaciones, engine
+from vacaciones import DIAS_MAXIMOS_ANIO, anio_soportado, cumple_antiguedad, dias_habiles
 
 Base.metadata.create_all(bind=engine)
 
@@ -136,3 +142,113 @@ def dar_de_baja_empleado(
     db.commit()
     db.refresh(empleado)
     return empleado
+
+
+def obtener_empleado_por_id_o_404(empleado_id: int, db: Session) -> Empleado:
+    empleado = db.query(Empleado).filter(Empleado.id == empleado_id).first()
+    if not empleado:
+        raise HTTPException(status_code=404, detail="Empleado no encontrado")
+    return empleado
+
+
+@app.post(
+    "/api/empleados/{empleado_id}/vacaciones",
+    response_model=VacacionesSalida,
+    status_code=201,
+)
+def solicitar_vacaciones(
+    empleado_id: int, datos: VacacionesCrear, db: Session = Depends(get_db)
+):
+    empleado = obtener_empleado_por_id_o_404(empleado_id, db)
+
+    if empleado.estado == "baja":
+        raise HTTPException(
+            status_code=409,
+            detail="No se pueden solicitar vacaciones para un empleado dado de baja",
+        )
+
+    if datos.fecha_fin < datos.fecha_inicio:
+        raise HTTPException(
+            status_code=400,
+            detail="La fecha de fin no puede ser anterior a la fecha de inicio",
+        )
+
+    if datos.fecha_inicio.year != datos.fecha_fin.year:
+        raise HTTPException(
+            status_code=400,
+            detail="Las vacaciones deben estar dentro de un mismo año calendario",
+        )
+
+    anio = datos.fecha_inicio.year
+    if not anio_soportado(anio):
+        raise HTTPException(
+            status_code=400,
+            detail="Solo se pueden solicitar vacaciones en 2026 y 2027",
+        )
+
+    if not cumple_antiguedad(empleado.fecha_ingreso, datos.fecha_inicio):
+        raise HTTPException(
+            status_code=400,
+            detail="Se requiere al menos un año de antigüedad a la fecha de inicio",
+        )
+
+    habiles = dias_habiles(datos.fecha_inicio, datos.fecha_fin)
+    if habiles == 0:
+        raise HTTPException(status_code=400, detail="El periodo no incluye días hábiles")
+
+    solicitudes_anio = (
+        db.query(Vacaciones).filter(Vacaciones.empleado_id == empleado_id).all()
+    )
+    usados = sum(s.dias_habiles for s in solicitudes_anio if s.fecha_inicio.year == anio)
+    disponibles = DIAS_MAXIMOS_ANIO - usados
+    if habiles > disponibles:
+        raise HTTPException(
+            status_code=400,
+            detail=f"La solicitud excede los días disponibles: quedan {disponibles} días hábiles",
+        )
+
+    solicitud = Vacaciones(
+        empleado_id=empleado_id,
+        fecha_inicio=datos.fecha_inicio,
+        fecha_fin=datos.fecha_fin,
+        dias_habiles=habiles,
+    )
+    db.add(solicitud)
+    db.commit()
+    db.refresh(solicitud)
+
+    return VacacionesSalida(
+        id=solicitud.id,
+        empleado_id=solicitud.empleado_id,
+        fecha_inicio=solicitud.fecha_inicio,
+        fecha_fin=solicitud.fecha_fin,
+        dias_habiles=solicitud.dias_habiles,
+        dias_restantes=disponibles - habiles,
+    )
+
+
+@app.get(
+    "/api/empleados/{empleado_id}/vacaciones",
+    response_model=SaldoVacacionesSalida,
+)
+def consultar_saldo_vacaciones(
+    empleado_id: int, anio: int | None = None, db: Session = Depends(get_db)
+):
+    obtener_empleado_por_id_o_404(empleado_id, db)
+
+    anio_consulta = anio or date.today().year
+    solicitudes = [
+        s
+        for s in db.query(Vacaciones).filter(Vacaciones.empleado_id == empleado_id).all()
+        if s.fecha_inicio.year == anio_consulta
+    ]
+    solicitudes.sort(key=lambda s: s.fecha_inicio)
+    dias_usados = sum(s.dias_habiles for s in solicitudes)
+
+    return SaldoVacacionesSalida(
+        empleado_id=empleado_id,
+        anio=anio_consulta,
+        dias_usados=dias_usados,
+        dias_disponibles=DIAS_MAXIMOS_ANIO - dias_usados,
+        solicitudes=solicitudes,
+    )
